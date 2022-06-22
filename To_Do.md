@@ -6,6 +6,6 @@
 
 [XX] By-hand analysis of time series behavior
 
-XGBoost with lags
+[XX] XGBoost with lags
 
-MTGPs
+~MTGPs~ Too Slow with this data --> use GPUs or switch to approx inference?

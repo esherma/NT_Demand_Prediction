@@ -1,4 +1,14 @@
 # North Texas Demand Prediction
 Analysis of energy demand in the North Texas market temperature data from 2017-2021 at Dallas-Fort Worth International Airport and load data from the North Texas region.
 
-Exploratory_Visualizations.ipynb contains plots of the temperature and weather over the course of the data as well as several average plots (canonical day, canonical month, average week over a year, etc.)
+I start in 01_Exploratory_Visualizations.ipynb, which contains plots of the temperature and load for several time frames (course of whole data, canonical day, canonical month, etc.). This file also contains plots exhibiting one-off behavior relating to disaster events. For instance, we see a clear drop in average load during the 2020 summer when COVID was at a peak. This artifact identification _could_ be used to help with downstream analysis (e.g. omit those dates), though I did not do so here.
+
+Furthering this exploratory process, in 02_Univariate_Models.ipynb, I worked to fit classical linear econometric models (AR and ARIMA) to the load data alone. Based on visual inspection, these do reasonably well for in-sample prediction, but the forecasts do not have reasonable behavior: the daily trend decays the further into the forecast window we look. This obviated the need to quantitatively test the quality of fit.
+
+In turn, in 03_Multivariate_Models.ipynb, I added in the temperature data to the AR(IMA) models as an exogenous variable. This slightly improved things but we still see somewhat odd behavior in the forecasts (decaying daily variance). Before trying more principled approaches I sought to replicate the analysis with data re-scaled to the [0, 1] range, since this would prevent temperate ([0, 100]) from being under-weighted relative to the higher-scale load ([8000, 30000]). That re-scaling analysis, in 04_Normalizing_Data.ipynb, yielded similarly disappointing results. In particular, we can look at plots of the residuals and quantiles of the residuals to see that there is skew in the residuals on the in-sample predictions. This suggests the data likely have heteroskedastic noise, meaning we'll need something more sophisticated than ARIMA to get a decent forecast.
+
+As a final check on ARIMA, I fit ARIMA using the auto-arima paradigm in 05_Auto_ARIMA.ipynb and separately doing a 'principled' approach to hyperparameter search (essentially a non-automated version of the auto-arima package). These also do not inspire confidence in the linear approach.
+
+(Briefly, I will mention that there's an argument to be made that MTGPs are a good option here since they provide a more sensible approach to quantify forecasting uncertainty via Bayesian sampling. I tried MTGPs (07_MTGPs.ipynb) and found that they were too computationally complex for this short-term exercise (too much data to fit the covariance matrix). Utilizing GPUs would be one potential solution. The other would be using variational/approximate MTGPs. I deemed that to be out of scope.)
+
+That brings me to XGBoost. In 08_XGBoost.ipynb I explore the use of XGBoost as the main modeling tool.
