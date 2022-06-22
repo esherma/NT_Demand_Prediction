@@ -11,4 +11,8 @@ As a final check on ARIMA, I fit ARIMA using the auto-arima paradigm in 05_Auto_
 
 (Briefly, I will mention that there's an argument to be made that MTGPs are a good option here since they provide a more sensible approach to quantify forecasting uncertainty via Bayesian sampling. I tried MTGPs (07_MTGPs.ipynb) and found that they were too computationally complex for this short-term exercise (too much data to fit the covariance matrix). Utilizing GPUs would be one potential solution. The other would be using variational/approximate MTGPs. I deemed that to be out of scope.)
 
-That brings me to XGBoost. In 08_XGBoost.ipynb I explore the use of XGBoost as the main modeling tool.
+That brings me to XGBoost. In 08_XGBoost.ipynb I explore the use of XGBoost as the main modeling tool. I used variables similar to those from the ARIMA analysis: 24 hour lags of temperature and load. In addition, to capture periodic behavior I included variables signifying the day, week, and month (i.e., putting in 'June' might tell us something about summer load). This produces reasonable-looking forecasts, so I quantitatively evaluated the model via MAE. We get about 5% error.
+
+A key obstacle here is forecasting far into the future given our lags. Given validation data, it is easy to make the mistake of constructing feature vectors given recent information. This is a mistake, since in a real world deployment one would not have contemporaneous data to make multi-day (or multi-month) predictions. Thus, to evaluate performance I performed chained forecasting: the predicted load for time period t feeds into the lags for the ensuing time periods t' > t.
+
+Evaluating uncertainty here is harder. One could think about doing quantile regression or doing a time series-clever bootstrap on training residuals. The latter is not the best option since uncertainty will generally be constant. Further thought is necessary.
